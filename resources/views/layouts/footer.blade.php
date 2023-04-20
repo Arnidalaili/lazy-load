@@ -54,11 +54,15 @@
                 rowNum: 10,
                 rowList : [10,15,20],
                 pager: '#jqGridPager',
+                rowattr: function (rowData) {
+                    return {"id": "row_" + rowData.id};
+                },
 
                 colNames: ['Id', 'No. Invoice', 'Name', 'Date', 'Gender', 'Saldo'],
                 colModel: [
                     {
                         name:'id',
+                        index: 'rowId',
                         sortable: true,
                         hidden: true,
                         key: true,
@@ -157,6 +161,9 @@
                     id: 'Id',
                     repeatitems: false
                 },
+                // rowattr: function (rowData) {
+                //     return {"id": "row_" + rowData.id};
+                // }
                 loadComplete: function () 
                 {
                     let grid = $("#grid_id");
@@ -164,7 +171,8 @@
                     let rowList = grid.getGridParam('rowList').sort(function(a, b) { return a - b; });
                     let totalRecords = grid.getGridParam("records");
                     let totalPages = Math.ceil(totalRecords / rowNum);
-                    let lastVisibleRow = parseInt(grid.find("tbody tr:last-child").attr("id").split("_")[1], 10);
+                    // let lastVisibleRow = grid.find("tbody tr:visible:first").attr("id");
+                    // console.log(lastVisibleRow);
 
                     //rowList
                     let maxVisibleRows = rowList[0];
@@ -176,6 +184,8 @@
                             break;
                         }
                     }
+
+                    
                     
                     //swipe
                     $("#grid_id").swipe(
@@ -204,18 +214,17 @@
                                 {
                                     grid.setGridParam({page: 1}).trigger("reloadGrid");
                                 } else {
-                                    if (lastVisibleRow < totalRecords) 
+                                    if (lastVisibleRow < maxVisibleRows) 
                                     {
                                         let nextPageRows = Math.min(maxVisibleRows, totalRecords - lastVisibleRow);
                                         grid.setGridParam({ page: currentPage, rowNum: maxVisibleRows + nextPageRows}).trigger("reloadGrid");
-                                    } 
+                                    }  
                                     else if (nextPage <= totalPages) 
                                     {
                                         grid.setGridParam({page: nextPage, rowNum: maxVisibleRows}).trigger("reloadGrid");
                                         grid[0].grid.bDiv.scrollTop = 0;
                                     }
                                 }
-                                
                             }
                         },
                         allowPageScroll: "vertical"
