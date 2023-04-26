@@ -54,15 +54,11 @@
                 rowNum: 10,
                 rowList : [10,15,20],
                 pager: '#jqGridPager',
-                rowattr: function (rowData) {
-                    return {"id": "row_" + rowData.id};
-                },
 
                 colNames: ['Id', 'No. Invoice', 'Name', 'Date', 'Gender', 'Saldo'],
                 colModel: [
                     {
                         name:'id',
-                        index: 'rowId',
                         sortable: true,
                         hidden: true,
                         key: true,
@@ -161,18 +157,14 @@
                     id: 'Id',
                     repeatitems: false
                 },
-                // rowattr: function (rowData) {
-                //     return {"id": "row_" + rowData.id};
-                // }
                 loadComplete: function () 
                 {
                     let grid = $("#grid_id");
                     let rowNum = grid.getGridParam('rowNum');
                     let rowList = grid.getGridParam('rowList').sort(function(a, b) { return a - b; });
                     let totalRecords = grid.getGridParam("records");
-                    let totalPages = Math.ceil(totalRecords / rowNum);
-                    // let lastVisibleRow = grid.find("tbody tr:visible:first").attr("id");
-                    // console.log(lastVisibleRow);
+                    
+                    
 
                     //rowList
                     let maxVisibleRows = rowList[0];
@@ -184,8 +176,7 @@
                             break;
                         }
                     }
-
-                    
+                    let totalPages = Math.ceil(totalRecords / maxVisibleRows);
                     
                     //swipe
                     $("#grid_id").swipe(
@@ -209,17 +200,25 @@
                                     } 
                                 }
                             } else if (direction === "up") 
-                             {
+                            {
+                                let scrollTop = grid[0].grid.bDiv.scrollTop;
+                                let pageHeight = grid[0].rows[0].clientHeight * maxVisibleRows;
+    
+                                let lastVisibleRow = parseInt(grid.find("tbody tr:last-child").attr("id").split("_")[1], 10);
+                                console.log(lastVisibleRow);
+                                
                                 if (lastVisibleRow === totalRecords && currentPage === totalPages) 
                                 {
                                     grid.setGridParam({page: 1}).trigger("reloadGrid");
-                                } else {
+                                } 
+                                else 
+                                {
                                     if (lastVisibleRow < maxVisibleRows) 
                                     {
                                         let nextPageRows = Math.min(maxVisibleRows, totalRecords - lastVisibleRow);
                                         grid.setGridParam({ page: currentPage, rowNum: maxVisibleRows + nextPageRows}).trigger("reloadGrid");
                                     }  
-                                    else if (nextPage <= totalPages) 
+                                    else if (nextPage <= totalPages)  
                                     {
                                         grid.setGridParam({page: nextPage, rowNum: maxVisibleRows}).trigger("reloadGrid");
                                         grid[0].grid.bDiv.scrollTop = 0;
