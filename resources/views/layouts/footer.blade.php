@@ -164,8 +164,6 @@
                     let rowList = grid.getGridParam('rowList').sort(function(a, b) { return a - b; });
                     let totalRecords = grid.getGridParam("records");
                     
-                    
-
                     //rowList
                     let maxVisibleRows = rowList[0];
                     for (let i = 0; i < rowList.length; i++) 
@@ -177,7 +175,7 @@
                         }
                     }
                     let totalPages = Math.ceil(totalRecords / maxVisibleRows);
-                    
+
                     //swipe
                     $("#grid_id").swipe(
                     {
@@ -193,44 +191,57 @@
                                 {
                                     grid.setGridParam({page: prevPage}).trigger("reloadGrid");
                                 } else {
-                                    let firstVisibleRow = parseInt(grid.find("tbody tr:first-child").attr("id").split("_")[1], 10);
+                                    let firstVisibleRow = 0;
+                                    let firstRow = grid.find("tbody tr:first-child");
+                                    if (firstRow.length > 0) 
+                                    {
+                                        let firstRowId = firstRow.attr("id");
+                                        if (firstRowId) 
+                                        {
+                                            firstVisibleRow = parseInt(firstRowId.split("_")[1], 10);
+                                        }
+                                    }
+                                    
                                     if (firstVisibleRow > 1) {
                                         let newRowNum = Math.min(firstVisibleRow - 1);
                                         grid.setGridParam({rowNum: newRowNum}).trigger("reloadGrid");
                                     } 
-                                }
+                                } 
                             } else if (direction === "up") 
-                            {
+                            { 
                                 let scrollTop = grid[0].grid.bDiv.scrollTop;
                                 let pageHeight = grid[0].rows[0].clientHeight * maxVisibleRows;
-    
-                                let lastVisibleRow = parseInt(grid.find("tbody tr:last-child").attr("id").split("_")[1], 10);
-                                console.log(lastVisibleRow);
                                 
+                                let lastVisibleRow = 0;
+                                let lastRow = grid.find("tbody tr:last-child");
+                                if (lastRow.length > 0) 
+                                {
+                                    lastVisibleRow = parseInt(lastRow.attr("id").split("_")[1], 10);
+                                }
+
                                 if (lastVisibleRow === totalRecords && currentPage === totalPages) 
                                 {
                                     grid.setGridParam({page: 1}).trigger("reloadGrid");
                                 } 
                                 else 
                                 {
-                                    if (lastVisibleRow < maxVisibleRows) 
+                                    if (nextPage <= totalPages)  
                                     {
-                                        let nextPageRows = Math.min(maxVisibleRows, totalRecords - lastVisibleRow);
-                                        grid.setGridParam({ page: currentPage, rowNum: maxVisibleRows + nextPageRows}).trigger("reloadGrid");
-                                    }  
-                                    else if (nextPage <= totalPages)  
-                                    {
-                                        grid.setGridParam({page: nextPage, rowNum: maxVisibleRows}).trigger("reloadGrid");
-                                        grid[0].grid.bDiv.scrollTop = 0;
+                                        if (event.cancelable) {
+                                            event.preventDefault();
+                                            grid.setGridParam({page: nextPage, rowNum: maxVisibleRows}).trigger("reloadGrid");
+                                            grid[0].grid.bDiv.scrollTop = 0;
+                                        }
                                     }
                                 }
                             }
                         },
                         allowPageScroll: "vertical"
                     });
-                } 
-            }); 
+                }
+            });
         });
     </script>
 </body>
 </html>
+
